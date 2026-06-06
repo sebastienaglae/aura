@@ -103,10 +103,16 @@ export interface GenOptions {
   label?: string;
   speed?: number;
   onComplete?: (payload: any) => void;
+  onFail?: (message?: string) => void;
   bars?: number;
   lines?: number;
+  tiles?: [number, number];
 }
-export class ImageGen { constructor(el: HTMLElement, opts?: GenOptions); start(): this; stop(): this; setProgress(p: number): this; setLabel(t: string): this; setColors(c: string[]): this; reset(): this; complete(url: string): this; destroy(): void; }
-export class SongGen  { constructor(el: HTMLElement, opts?: GenOptions); start(): this; stop(): this; setProgress(p: number): this; setLabel(t: string): this; setColors(c: string[]): this; reset(): this; complete(payload: string | HTMLElement): this; destroy(): void; }
-export class VideoGen { constructor(el: HTMLElement, opts?: GenOptions); start(): this; stop(): this; setProgress(p: number): this; setLabel(t: string): this; setColors(c: string[]): this; reset(): this; complete(payload: string | HTMLVideoElement): this; destroy(): void; }
-export class TextGen  { constructor(el: HTMLElement, opts?: GenOptions); start(): this; stop(): this; setProgress(p: number): this; setLabel(t: string): this; setColors(c: string[]): this; reset(): this; complete(payload: string | { text: string; type?: boolean }): this; destroy(): void; }
+export interface Gen<P = any> {
+  start(): this; stop(): this; setProgress(p: number): this; setLabel(t: string): this;
+  setColors(c: string[]): this; reset(): this; complete(payload: P): this; fail(message?: string): this; destroy(): void;
+}
+export class ImageGen implements Gen<string> { constructor(el: HTMLElement, opts?: GenOptions); start(): this; stop(): this; setProgress(p: number): this; setLabel(t: string): this; setColors(c: string[]): this; reset(): this; complete(url: string): this; fail(message?: string): this; destroy(): void; }
+export class SongGen  implements Gen<string | HTMLElement> { constructor(el: HTMLElement, opts?: GenOptions); start(): this; stop(): this; setProgress(p: number): this; setLabel(t: string): this; setColors(c: string[]): this; reset(): this; complete(payload: string | HTMLElement): this; fail(message?: string): this; destroy(): void; }
+export class VideoGen implements Gen<string | HTMLVideoElement> { constructor(el: HTMLElement, opts?: GenOptions); start(): this; stop(): this; setProgress(p: number): this; setLabel(t: string): this; setColors(c: string[]): this; reset(): this; complete(payload: string | HTMLVideoElement): this; fail(message?: string): this; destroy(): void; }
+export class TextGen  implements Gen<string | { text: string; type?: boolean }> { constructor(el: HTMLElement, opts?: GenOptions); start(): this; stop(): this; setProgress(p: number): this; setLabel(t: string): this; setColors(c: string[]): this; reset(): this; complete(payload: string | { text: string; type?: boolean }): this; fail(message?: string): this; destroy(): void; }

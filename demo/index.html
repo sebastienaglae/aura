@@ -49,10 +49,10 @@
     </div>
 
     <div class="gens">
-      <div class="gen"><div class="box" id="g-image"></div><div class="lbl"><b>Image</b><button data-gen="image">generate</button></div></div>
-      <div class="gen"><div class="box" id="g-song"></div><div class="lbl"><b>Song</b><button data-gen="song">generate</button></div></div>
-      <div class="gen"><div class="box" id="g-video"></div><div class="lbl"><b>Video</b><button data-gen="video">generate</button></div></div>
-      <div class="gen"><div class="box" id="g-text"></div><div class="lbl"><b>Text</b><button data-gen="text">generate</button></div></div>
+      <div class="gen"><div class="box" id="g-image"></div><div class="lbl"><b>Image</b><span><button data-gen="image">generate</button> <button data-fail="image">fail</button></span></div></div>
+      <div class="gen"><div class="box" id="g-song"></div><div class="lbl"><b>Song</b><span><button data-gen="song">generate</button> <button data-fail="song">fail</button></span></div></div>
+      <div class="gen"><div class="box" id="g-video"></div><div class="lbl"><b>Video</b><span><button data-gen="video">generate</button> <button data-fail="video">fail</button></span></div></div>
+      <div class="gen"><div class="box" id="g-text"></div><div class="lbl"><b>Text</b><span><button data-gen="text">generate</button> <button data-fail="text">fail</button></span></div></div>
     </div>
   </div>
 
@@ -84,13 +84,19 @@
     };
     document.querySelectorAll('[data-gen]').forEach(b => b.onclick = () => {
       const k = b.dataset.gen, g = gens[k];
-      g.reset();                                  // show the colorful "generating" animation
+      clearTimeout(g._t); g.reset();              // show the colorful "generating" animation
       let p = 0; const iv = setInterval(() => { p += 0.12; g.setProgress(p); if (p >= 1) clearInterval(iv); }, 220);
-      setTimeout(() => {                          // pretend the AI finished
+      g._t = setTimeout(() => {                    // pretend the AI finished
         clearInterval(iv);
         if (k === 'song' || k === 'video') { const n = document.createElement('div'); n.style.cssText='position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#0a0d18;color:#9fb3ff;font:600 13px system-ui'; n.textContent = k+' ready'; g.complete(n); }
         else g.complete(RESULTS[k]);
       }, 2600);
+    });
+    // simulate a failed generation
+    document.querySelectorAll('[data-fail]').forEach(b => b.onclick = () => {
+      const k = b.dataset.fail, g = gens[k];
+      clearTimeout(g._t); g.reset();
+      g._t = setTimeout(() => g.fail(k + ' generation failed'), 1400);
     });
   </script>
 </body>

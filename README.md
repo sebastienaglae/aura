@@ -1,8 +1,10 @@
 # Aura
 
 **A Dash Systems product.** A voice-reactive orb + a set of colorful *generative-AI* loading
-animations (image, song, video, text). Framework-agnostic, dependency-free, with optional
-React bindings.
+animations (image, song, video, text) with success **and failure** states. Framework-agnostic,
+dependency-free, with optional React bindings.
+
+> Repo: **`dash-systems/aura`** · package: **`@dash-systems/aura`**
 
 > Aura is **UI only** — it never calls an AI service. You wire it to your own pipeline:
 > drive the orb's mode/level and play a generator while your model works, then reveal the result.
@@ -115,15 +117,23 @@ g.complete(url);                                 // fades the image in
 ```
 
 Every generator shares: `start()` · `stop()` · `setProgress(0..1)` · `setLabel(text)` ·
-`reset()` · `complete(payload)` · `destroy()`, plus an `onComplete(payload)` option and
-`colors` / `label` / `speed`.
+`reset()` · `complete(payload)` · **`fail(message?)`** · `destroy()`, plus `onComplete(payload)`
+/ `onFail(message)` options and `colors` / `label` / `speed`.
+
+```js
+try   { g.complete(await ai.generate(prompt)); }   // reveal result
+catch { g.fail('Could not generate'); }            // red shake + message
+```
 
 | class | animation | `complete(payload)` reveals |
 |---|---|---|
-| `ImageGen` | flowing gradient mesh + shimmer sweep + grain | image URL → `<img>` |
-| `SongGen` | colorful equalizer bars | audio URL → `<audio>`, or a DOM node |
+| `ImageGen` | resolving mosaic of colored tiles + photo glyph | image URL → `<img>` |
+| `SongGen` | equalizer bars + baseline + note glyph | audio URL → `<audio>`, or a DOM node |
 | `VideoGen` | scanlines + pulsing play glyph | video URL → `<video>`, or a node |
 | `TextGen` | shimmering skeleton lines | string → typed-in text (`{text,type:false}` to skip) |
+
+All four also show a **red shake + message** on `fail()`. In React, pass `error` (and optional
+`progress`): `<AuraImageGen generating={loading} result={url} error={err} />`.
 
 ---
 

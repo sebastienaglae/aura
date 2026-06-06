@@ -46,7 +46,7 @@ export function Aura({ mode = 'normal', source = 'off', options, onReady, onMode
 }
 
 function makeGen(GenClass) {
-  return function GenComponent({ generating = true, result = null, options, onReady, className, style, ...rest }) {
+  return function GenComponent({ generating = true, result = null, error = null, progress, options, onReady, className, style, ...rest }) {
     const hostRef = useRef(null);
     const genRef = useRef(null);
     useEffect(() => {
@@ -56,6 +56,8 @@ function makeGen(GenClass) {
     }, []); // eslint-disable-line
     useEffect(() => { const g = genRef.current; if (!g) return; if (generating) g.reset(); else g.stop(); }, [generating]);
     useEffect(() => { const g = genRef.current; if (g && result != null) g.complete(result); }, [result]);
+    useEffect(() => { const g = genRef.current; if (g && error != null && error !== false) g.fail(typeof error === 'string' ? error : undefined); }, [error]);
+    useEffect(() => { const g = genRef.current; if (g && progress != null) g.setProgress(progress); }, [progress]);
     return <div ref={hostRef} className={className} style={{ position: 'relative', ...style }} {...rest} />;
   };
 }
