@@ -37,15 +37,18 @@ function injectCSS() {
 .ag-glyph { position: absolute; inset: 0; margin: auto; width: 34%; height: 34%; opacity: .55; filter: drop-shadow(0 2px 8px rgba(0,0,0,.5)); }
 .ag-run .ag-glyph { animation: ag-breathe 2.2s ease-in-out infinite; }
 @keyframes ag-breathe { 0%,100%{opacity:.4;transform:scale(.96)} 50%{opacity:.7;transform:scale(1.03)} }
-.ag-label { position: absolute; left: 0; right: 0; bottom: 9px; text-align: center; color: #fff; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; text-shadow: 0 1px 6px rgba(0,0,0,.7); opacity: .85; }
-.ag-bar-progress { position: absolute; left: 8%; right: 8%; bottom: 26px; height: 4px; border-radius: 4px; background: rgba(255,255,255,.16); overflow: hidden; opacity: 0; transition: opacity .3s; }
-.ag-bar-progress.show { opacity: 1; }
-.ag-bar-progress > i { display: block; height: 100%; width: calc(var(--ag-p,0)*100%); background: linear-gradient(90deg, var(--ag-cols)); transition: width .3s ease; }
+/* indeterminate loading bar (progress isn't predictable, so it just animates) */
+.ag-load { position: absolute; left: 9%; right: 9%; bottom: 14px; height: 4px; border-radius: 4px; background: rgba(255,255,255,.14); overflow: hidden; opacity: 0; transition: opacity .3s; }
+.ag-run .ag-load { opacity: 1; }
+.ag-load > i { position: absolute; top: 0; bottom: 0; width: 38%; border-radius: 4px; background: linear-gradient(90deg, var(--ag-cols)); }
+.ag-run .ag-load > i { animation: ag-load 1.25s cubic-bezier(.65,.1,.35,.9) infinite; }
+@keyframes ag-load { 0% { left: -42% } 100% { left: 100% } }
 
 /* reveal */
 .ag-reveal { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transform: scale(1.04); transition: opacity .55s ease, transform .55s ease; }
 .ag-reveal.show { opacity: 1; transform: scale(1); }
-.ag-done .ag-flow, .ag-done .ag-sweep, .ag-done .ag-eq, .ag-done .ag-scan, .ag-done .ag-play, .ag-done .ag-lines, .ag-done .ag-mosaic, .ag-done .ag-glyph, .ag-done .ag-wave, .ag-done .ag-label, .ag-done .ag-bar-progress { opacity: 0 !important; transition: opacity .45s; }
+/* fade ALL generating layers away on both success and failure (no overlap) */
+.ag-done .ag-layer, .ag-fail .ag-layer { opacity: 0 !important; transition: opacity .4s; }
 
 /* IMAGE — resolving mosaic of colored tiles + image glyph */
 .ag-mosaic { position: absolute; inset: 0; display: grid; gap: 2px; padding: 6px; }
@@ -76,14 +79,14 @@ function injectCSS() {
 .ag-text { position: absolute; inset: 0; padding: 8% 9%; color: #f4f6ff; font: 500 clamp(14px,2vw,18px)/1.55 system-ui,sans-serif; opacity: 1; overflow: auto; animation: ag-fadein .45s ease; }
 /* animate transform only — opacity stays 1 so text is visible even if the tab isn't compositing */
 @keyframes ag-fadein { from { transform: translateY(6px) } to { transform: none } }
-.ag-text::after { content: '▋'; opacity: .6; animation: ag-caret 1s steps(1) infinite; }
+/* a steady caret pinned right after the typed text — it moves as the text grows */
+.ag-text::after { content: '▋'; margin-left: 1px; color: #9fb3ff; }
 .ag-text.done::after { content: ''; }
-@keyframes ag-caret { 50% { opacity: 0 } }
 
 /* FAIL — red shake + message (any generator) */
 .ag-fail { animation: ag-shake .42s ease; }
 @keyframes ag-shake { 0%,100%{transform:translateX(0)} 18%{transform:translateX(-7px)} 38%{transform:translateX(6px)} 58%{transform:translateX(-4px)} 78%{transform:translateX(3px)} }
-.ag-failmsg { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; padding: 8%; text-align: center; background: radial-gradient(120% 120% at 50% 45%, rgba(120,18,22,.55), rgba(40,6,8,.85)); color: #ffb4b4; font: 600 13px/1.4 system-ui, sans-serif; opacity: 0; transition: opacity .3s ease; }
+.ag-failmsg { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: radial-gradient(120% 120% at 50% 45%, #4a0c10, #1a0405 92%); }
 .ag-failmsg.show { opacity: 1; }
 .ag-failmsg svg { width: 34px; height: 34px; color: #ff6a6a; animation: ag-failpulse 1.1s ease-in-out infinite; }
 @keyframes ag-failpulse { 0%,100%{ transform: scale(1); opacity:.85 } 50%{ transform: scale(1.12); opacity:1 } }`;
@@ -102,13 +105,16 @@ class GenBase {
     node.style.setProperty('--ag-speed', this.o.speed + 's');
     this.node = node; el.appendChild(node);
     this._build();
-    if (this.o.label) this.setLabel(this.o.label);
+    // indeterminate loading bar for every generator
+    const load = document.createElement('div'); load.className = 'ag-load'; load.innerHTML = '<i></i>'; node.appendChild(load);
+    // tag everything built so far as a "generating layer" (faded out on done/fail)
+    Array.from(node.children).forEach(c => c.classList.add('ag-layer'));
     if (this.o.autoStart) this.start();
   }
   start()        { this.node.classList.add('ag-run'); this.node.classList.remove('ag-done', 'ag-fail'); return this; }
   stop()         { this.node.classList.remove('ag-run'); return this; }
-  setProgress(p) { this.node.style.setProperty('--ag-p', clamp01(p)); if (this._bar) this._bar.classList.add('show'); return this; }
-  setLabel(t)    { if (!this._label) { this._label = document.createElement('div'); this._label.className = 'ag-label'; this.node.appendChild(this._label); } this._label.textContent = t; return this; }
+  setProgress()  { return this; }   // progress isn't predictable — the bar is indeterminate
+  setLabel()     { return this; }   // no text in generation by design
   setColors(c)   { this.o.colors = c; this.node.style.setProperty('--ag-cols', gradList(c)); return this; }
   reset() {
     this.node.classList.remove('ag-done', 'ag-fail');
@@ -122,15 +128,14 @@ class GenBase {
     if (this.o.onComplete) this.o.onComplete(payload);
     return this;
   }
-  /** show the failure animation (red shake + message) */
+  /** show the failure animation (red shake + icon, no text) and fade the content behind */
   fail(message) {
     this.stop();
     if (!this._fail) {
       this._fail = document.createElement('div'); this._fail.className = 'ag-failmsg';
-      this._fail.innerHTML = ICON.fail; this._failText = document.createElement('div'); this._fail.appendChild(this._failText);
+      this._fail.innerHTML = ICON.fail;     // icon only — no text
       this.node.appendChild(this._fail);
     }
-    this._failText.textContent = message || 'Generation failed';
     // restart the shake even if already failed once
     this.node.classList.remove('ag-fail'); void this.node.offsetWidth; this.node.classList.add('ag-fail');
     void this._fail.offsetWidth; this._fail.classList.add('show');
@@ -161,8 +166,6 @@ export class ImageGen extends GenBase {
     this.node.appendChild(m);
     this.node.insertAdjacentHTML('beforeend', ICON.image);
     this.node.appendChild(Object.assign(document.createElement('div'), { className: 'ag-sweep' }));
-    this._bar = Object.assign(document.createElement('div'), { className: 'ag-bar-progress', innerHTML: '<i></i>' });
-    this.node.appendChild(this._bar);
   }
   _reveal(url) { if (!url) return; const img = new Image(); img.alt = ''; img.onload = () => this._mediaShow(img); img.src = url; }
 }
@@ -200,8 +203,6 @@ export class VideoGen extends GenBase {
     this.node.appendChild(Object.assign(document.createElement('div'), { className: 'ag-flow' }));
     this.node.appendChild(Object.assign(document.createElement('div'), { className: 'ag-scan' }));
     this.node.appendChild(Object.assign(document.createElement('div'), { className: 'ag-play' }));
-    this._bar = Object.assign(document.createElement('div'), { className: 'ag-bar-progress', innerHTML: '<i></i>' });
-    this.node.appendChild(this._bar);
   }
   _reveal(payload) {
     if (!payload) return;

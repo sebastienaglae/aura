@@ -71,7 +71,7 @@
 
     // generators — your app calls .complete(result) when the AI is done
     const gens = {
-      image: new ImageGen(document.getElementById('g-image'), { autoStart: false, label: 'imagining' }),
+      image: new ImageGen(document.getElementById('g-image'), { autoStart: false }),
       song:  new SongGen(document.getElementById('g-song'),  { autoStart: false, colors: ['#00d4ff','#3d6bff','#a93bff'] }),
       video: new VideoGen(document.getElementById('g-video'), { autoStart: false, colors: ['#ff2d6f','#ff7a00','#ffe000'] }),
       text:  new TextGen(document.getElementById('g-text'),  { autoStart: false, lines: 5 }),
@@ -84,10 +84,8 @@
     };
     document.querySelectorAll('[data-gen]').forEach(b => b.onclick = () => {
       const k = b.dataset.gen, g = gens[k];
-      clearTimeout(g._t); g.reset();              // show the colorful "generating" animation
-      let p = 0; const iv = setInterval(() => { p += 0.12; g.setProgress(p); if (p >= 1) clearInterval(iv); }, 220);
+      clearTimeout(g._t); g.reset();              // colorful indeterminate "generating" animation
       g._t = setTimeout(() => {                    // pretend the AI finished
-        clearInterval(iv);
         if (k === 'song' || k === 'video') { const n = document.createElement('div'); n.style.cssText='position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#0a0d18;color:#9fb3ff;font:600 13px system-ui'; n.textContent = k+' ready'; g.complete(n); }
         else g.complete(RESULTS[k]);
       }, 2600);
