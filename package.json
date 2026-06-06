@@ -1,0 +1,36 @@
+{
+  "name": "@dash-systems/aura",
+  "version": "0.1.0",
+  "description": "Aura — a voice-reactive orb and a set of generative-AI loading animations (image, song, video, text). Framework-agnostic with optional React bindings. A Dash Systems product.",
+  "type": "module",
+  "main": "./src/index.js",
+  "module": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": "./src/index.js",
+    "./gen": "./src/aura-gen.js",
+    "./react": "./src/aura-react.jsx"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "keywords": [
+    "voice", "orb", "ai", "generative", "animation", "ui",
+    "web-audio", "speech", "react", "loading", "shimmer", "dash-systems"
+  ],
+  "author": "Dash Systems",
+  "license": "MIT",
+  "homepage": "https://github.com/dash-systems/aura",
+  "repository": { "type": "git", "url": "https://github.com/dash-systems/aura.git" },
+  "peerDependencies": {
+    "react": ">=17",
+    "react-dom": ">=17"
+  },
+  "peerDependenciesMeta": {
+    "react": { "optional": true },
+    "react-dom": { "optional": true }
+  }
+}

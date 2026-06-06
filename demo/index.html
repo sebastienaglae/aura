@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Aura — Dash Systems · demo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Space+Mono&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: system-ui, sans-serif; background: #06070c; color: #eef1ff; min-height: 100vh; }
+  #stage { position: fixed; inset: 0; z-index: 40; pointer-events: none; }
+  .wrap { position: relative; z-index: 1; max-width: 1000px; margin: 0 auto; padding: 7vh 24px 16vh; }
+  h1 { font-family: 'Fraunces', serif; font-weight: 600; font-size: clamp(34px, 6vw, 60px); letter-spacing: -.02em; }
+  .tag { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: .3em; text-transform: uppercase; color: #6b7396; margin-top: 8px; }
+  .panel { margin-top: 30px; background: #0d101c; border: 1px solid #1c2236; border-radius: 16px; padding: 20px 22px; }
+  .panel h2 { font-size: 14px; letter-spacing: .12em; text-transform: uppercase; color: #8b93b5; margin-bottom: 14px; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; }
+  button { font: 600 13px/1 system-ui; padding: 11px 16px; border-radius: 10px; border: 1px solid #2a3150; background: #161b30; color: #eef1ff; cursor: pointer; }
+  button:hover { border-color: #4d7bff; }
+  button.go { background: #4d7bff; border-color: #4d7bff; }
+  .gens { margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; }
+  .gen { background: #0d101c; border: 1px solid #1c2236; border-radius: 16px; padding: 14px; }
+  .gen .box { height: 150px; border-radius: 12px; overflow: hidden; background: #05060c; }
+  .gen .lbl { display: flex; justify-content: space-between; align-items: center; margin: 12px 2px 0; font-size: 13px; color: #aab; }
+  .gen .lbl b { font-weight: 600; color: #eef1ff; }
+</style>
+</head>
+<body>
+  <div id="stage"></div>
+  <div class="wrap">
+    <h1>Aura</h1>
+    <div class="tag">Dash Systems · voice + generative-AI animation kit</div>
+
+    <div class="panel">
+      <h2>Voice orb</h2>
+      <div class="row">
+        <button class="go" id="mic">Enable microphone</button>
+        <button id="demo">Demo voice</button>
+        <button id="off">Stop</button>
+        <button data-mode="normal">normal</button>
+        <button data-mode="think">think</button>
+        <button data-mode="error">error</button>
+        <button data-mode="success">success</button>
+        <button data-mode="warning">warning</button>
+        <button id="subs">subtitles</button>
+        <button id="close">dismiss</button>
+      </div>
+      <p style="margin-top:12px;color:#6b7396;font-size:13px">Drag the orb anywhere · click it then click the × to close · modes cross-fade smoothly.</p>
+    </div>
+
+    <div class="gens">
+      <div class="gen"><div class="box" id="g-image"></div><div class="lbl"><b>Image</b><button data-gen="image">generate</button></div></div>
+      <div class="gen"><div class="box" id="g-song"></div><div class="lbl"><b>Song</b><button data-gen="song">generate</button></div></div>
+      <div class="gen"><div class="box" id="g-video"></div><div class="lbl"><b>Video</b><button data-gen="video">generate</button></div></div>
+      <div class="gen"><div class="box" id="g-text"></div><div class="lbl"><b>Text</b><button data-gen="text">generate</button></div></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { VoiceOrb, ImageGen, SongGen, VideoGen, TextGen } from '../src/index.js';
+
+    const orb = new VoiceOrb(document.getElementById('stage'), {
+      threshold: 0.20, ballRadius: 30, maxEdge: 20, borderRadius: 22, position: [2, 2],
+    });
+    document.getElementById('mic').onclick  = () => orb.open().enableMic().catch(()=>{});
+    document.getElementById('demo').onclick = () => orb.open().enableDemo();
+    document.getElementById('off').onclick  = () => orb.stop();
+    document.getElementById('close').onclick = () => orb.close();
+    document.getElementById('subs').onclick = () => orb.showSubtitles(!orb._wantSubs);
+    document.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => orb.setMode(b.dataset.mode));
+
+    // generators — your app calls .complete(result) when the AI is done
+    const gens = {
+      image: new ImageGen(document.getElementById('g-image'), { autoStart: false, label: 'imagining' }),
+      song:  new SongGen(document.getElementById('g-song'),  { autoStart: false, colors: ['#00d4ff','#3d6bff','#a93bff'] }),
+      video: new VideoGen(document.getElementById('g-video'), { autoStart: false, colors: ['#ff2d6f','#ff7a00','#ffe000'] }),
+      text:  new TextGen(document.getElementById('g-text'),  { autoStart: false, lines: 5 }),
+    };
+    const RESULTS = {
+      image: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="%23ff2d6f"/><stop offset=".5" stop-color="%237a5bff"/><stop offset="1" stop-color="%2300d4ff"/></linearGradient></defs><rect width="400" height="300" fill="url(%23g)"/></svg>'),
+      text:  'Aura turns your AI pipeline into something people can feel. While the model thinks, the orb breathes; while it writes, the words shimmer in. Generation has never looked this alive.',
+      song:  '#',  // would be an audio URL
+      video: '#',  // would be a video URL
+    };
+    document.querySelectorAll('[data-gen]').forEach(b => b.onclick = () => {
+      const k = b.dataset.gen, g = gens[k];
+      g.reset();                                  // show the colorful "generating" animation
+      let p = 0; const iv = setInterval(() => { p += 0.12; g.setProgress(p); if (p >= 1) clearInterval(iv); }, 220);
+      setTimeout(() => {                          // pretend the AI finished
+        clearInterval(iv);
+        if (k === 'song' || k === 'video') { const n = document.createElement('div'); n.style.cssText='position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#0a0d18;color:#9fb3ff;font:600 13px system-ui'; n.textContent = k+' ready'; g.complete(n); }
+        else g.complete(RESULTS[k]);
+      }, 2600);
+    });
+  </script>
+</body>
+</html>
