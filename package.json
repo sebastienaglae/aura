@@ -25,6 +25,14 @@
   "license": "MIT",
   "homepage": "https://github.com/dash-systems/aura",
   "repository": { "type": "git", "url": "https://github.com/dash-systems/aura.git" },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
+  },
+  "scripts": {
+    "check": "node --check src/aura.js && node --check src/aura-gen.js && node --check src/index.js",
+    "smoke": "node --input-type=module -e \"import('./src/index.js').then(m=>{if(!m.VoiceOrb||!m.ImageGen||!m.Aura)throw new Error('missing exports');console.log('exports ok');})\""
+  },
   "peerDependencies": {
     "react": ">=17",
     "react-dom": ">=17"

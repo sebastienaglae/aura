@@ -9,6 +9,14 @@ dependency-free, with optional React bindings.
 > Aura is **UI only** — it never calls an AI service. You wire it to your own pipeline:
 > drive the orb's mode/level and play a generator while your model works, then reveal the result.
 
+Published to **GitHub Packages**. Point the scope at GitHub once in your project `.npmrc`,
+then install:
+
+```ini
+# .npmrc
+@dash-systems:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}   # a PAT with read:packages
+```
 ```bash
 npm i @dash-systems/aura
 ```
@@ -168,14 +176,36 @@ function Assistant({ thinking, micOn }) {
 ## Repo layout
 
 ```
-src/            the published package
-  aura.js         orb + audio engine
-  aura-gen.js     generative-AI animations
-  aura-react.jsx  React bindings
+src/                the published package (only this + README + LICENSE ship)
+  aura.js             orb + audio engine
+  aura-gen.js         generative-AI animations
+  aura-react.jsx      React bindings
   index.js / index.d.ts
-demo/           local demos (NOT published)
-  index.html      controls + generators
-  example.html    fake site showing highlight-and-avoid
+demo/               local demos (NOT published)
+.github/workflows/  CI + Release
 ```
 
 Run the demos with any static server, e.g. `npx serve` then open `/demo/index.html`.
+
+## CI / CD & releasing
+
+Two GitHub Actions workflows:
+
+- **CI** (`ci.yml`) — on every push/PR to `main`: syntax check, an ESM import smoke test
+  (exports present), and `npm pack --dry-run`.
+- **Release** (`release.yml`) — on a pushed tag `v*.*.*`:
+  1. sets the package version **from the tag** (`v1.2.3` → `1.2.3`),
+  2. publishes to **GitHub Packages**,
+  3. creates a GitHub Release with generated notes,
+  4. **prunes every older version, keeping only the latest** (`min-versions-to-keep: 1`).
+
+Versioning is tag-driven — cut a release by tagging:
+
+```bash
+git tag v1.2.3
+git push origin v1.2.3
+```
+
+No secrets to configure: it uses the built-in `GITHUB_TOKEN` (`permissions: packages: write`).
+If your org blocks `GITHUB_TOKEN` from deleting package versions, enable it in
+*Org → Packages settings* (or the prune step no-ops via `continue-on-error`).

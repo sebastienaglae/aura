@@ -1,0 +1,53 @@
+name: Release
+
+# Versioning is driven by git tags. Push a tag like `v1.2.3` to cut a release:
+#   git tag v1.2.3 && git push origin v1.2.3
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write   # create the GitHub Release
+  packages: write   # publish + delete package versions
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://npm.pkg.github.com
+          scope: '@dash-systems'
+
+      # tag v1.2.3 -> package version 1.2.3 (no extra git commit/tag)
+      - name: Set version from tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "Publishing version $VERSION"
+          npm version "$VERSION" --no-git-tag-version --allow-same-version
+
+      - name: Verify before publish
+        run: npm run check && npm run smoke
+
+      - name: Publish to GitHub Packages
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create GitHub Release
+        run: gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --generate-notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # keep ONLY the version we just published; delete all older ones
+      - name: Prune old package versions (keep latest only)
+        uses: actions/delete-package-versions@v5
+        continue-on-error: true   # no-op on the very first publish
+        with:
+          package-name: aura
+          package-type: npm
+          min-versions-to-keep: 1
