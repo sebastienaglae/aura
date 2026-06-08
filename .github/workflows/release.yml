@@ -55,17 +55,31 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Confirm it published
+        run: npm view "@sebastienaglae/aura@${{ steps.ver.outputs.version }}" version
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       # Creates the tag too when run manually (it doesn't exist yet)
       - name: Create GitHub Release
         run: gh release create "${{ steps.ver.outputs.tag }}" --target "$GITHUB_SHA" --title "${{ steps.ver.outputs.tag }}" --generate-notes
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # keep ONLY the version we just published; delete all older ones
+      # Keep ONLY older versions deleted — NEVER the one we just shipped.
+      # `min-versions-to-keep: 1` keeps the newest (== this release); the explicit
+      # `num-old-versions-to-delete: 0` disables the action's dangerous default of 1,
+      # which would otherwise delete the only version on a fresh package.
       - name: Prune old package versions (keep latest only)
         uses: actions/delete-package-versions@v5
-        continue-on-error: true   # no-op on the very first publish
+        continue-on-error: true
         with:
           package-name: aura
           package-type: npm
           min-versions-to-keep: 1
+          num-old-versions-to-delete: 0
+
+      - name: Confirm the latest is still installable (prune didn't nuke it)
+        run: npm view "@sebastienaglae/aura@${{ steps.ver.outputs.version }}" version
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
