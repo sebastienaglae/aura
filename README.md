@@ -4,7 +4,7 @@
 animations (image, song, video, text) with success **and failure** states. Framework-agnostic,
 dependency-free, with optional React bindings.
 
-> Repo: **`dash-systems/aura`** · package: **`@dash-systems/aura`**
+> Repo: **`sebastienaglae/aura`** · package: **`@sebastienaglae/aura`**
 
 > Aura is **UI only** — it never calls an AI service. You wire it to your own pipeline:
 > drive the orb's mode/level and play a generator while your model works, then reveal the result.
@@ -14,11 +14,11 @@ then install:
 
 ```ini
 # .npmrc
-@dash-systems:registry=https://npm.pkg.github.com
+@sebastienaglae:registry=https://npm.pkg.github.com
 //npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}   # a PAT with read:packages
 ```
 ```bash
-npm i @dash-systems/aura
+npm i @sebastienaglae/aura
 ```
 
 ---
@@ -29,7 +29,7 @@ npm i @dash-systems/aura
 <div id="stage" style="position:fixed; inset:0;"></div>
 ```
 ```js
-import { VoiceOrb } from '@dash-systems/aura';
+import { VoiceOrb } from '@sebastienaglae/aura';
 
 const orb = new VoiceOrb(document.getElementById('stage'), {
   threshold: 0.20,     // ignore the bottom 20% of loudness → silence is eventless
@@ -114,7 +114,7 @@ off(); // unsubscribe
 Play a lively colorful placeholder while your model generates, then reveal the result.
 
 ```js
-import { ImageGen, SongGen, VideoGen, TextGen } from '@dash-systems/aura/gen';
+import { ImageGen, SongGen, VideoGen, TextGen } from '@sebastienaglae/aura/gen';
 
 const g = new ImageGen(document.getElementById('thumb'), {
   colors: ['#ff2d6f', '#7a5bff', '#00d4ff'],
@@ -148,7 +148,7 @@ All four also show a **red shake + message** on `fail()`. In React, pass `error`
 ## React
 
 ```jsx
-import { Aura, AuraImageGen } from '@dash-systems/aura/react';
+import { Aura, AuraImageGen } from '@sebastienaglae/aura/react';
 
 function Assistant({ thinking, micOn }) {
   return (

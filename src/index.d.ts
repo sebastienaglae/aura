@@ -1,4 +1,4 @@
-// Type definitions for @dash-systems/aura
+// Type definitions for @sebastienaglae/aura
 
 export type AuraMode = 'normal' | 'think' | 'error' | 'success' | 'warning';
 
@@ -96,7 +96,7 @@ export class VoiceOrb {
 export const Aura: typeof VoiceOrb;
 export default VoiceOrb;
 
-// ---- generators (import from '@dash-systems/aura/gen') ----
+// ---- generators (import from '@sebastienaglae/aura/gen') ----
 export interface GenOptions {
   autoStart?: boolean;
   colors?: string[];

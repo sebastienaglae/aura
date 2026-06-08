@@ -21,7 +21,7 @@ jobs:
         with:
           node-version: 20
           registry-url: https://npm.pkg.github.com
-          scope: '@dash-systems'
+          scope: '@sebastienaglae'
 
       # tag v1.2.3 -> package version 1.2.3 (no extra git commit/tag)
       - name: Set version from tag

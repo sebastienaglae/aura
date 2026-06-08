@@ -1,8 +1,8 @@
 /*!
  * Aura — React bindings.  © Dash Systems.
- * Import path: `@dash-systems/aura/react`
+ * Import path: `@sebastienaglae/aura/react`
  *
- *   import { Aura, AuraImageGen } from '@dash-systems/aura/react';
+ *   import { Aura, AuraImageGen } from '@sebastienaglae/aura/react';
  *   <Aura mode="think" source="mic" options={{ borderRadius: 24 }} />
  *   <AuraImageGen generating={loading} result={url} />
  */

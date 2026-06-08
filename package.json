@@ -1,5 +1,5 @@
 {
-  "name": "@dash-systems/aura",
+  "name": "@sebastienaglae/aura",
   "version": "0.1.0",
   "description": "Aura — a voice-reactive orb and a set of generative-AI loading animations (image, song, video, text). Framework-agnostic with optional React bindings. A Dash Systems product.",
   "type": "module",
@@ -23,8 +23,8 @@
   ],
   "author": "Dash Systems",
   "license": "MIT",
-  "homepage": "https://github.com/dash-systems/aura",
-  "repository": { "type": "git", "url": "https://github.com/dash-systems/aura.git" },
+  "homepage": "https://github.com/sebastienaglae/aura",
+  "repository": { "type": "git", "url": "https://github.com/sebastienaglae/aura.git" },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
     "access": "restricted"
