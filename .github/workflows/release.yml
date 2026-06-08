@@ -1,14 +1,21 @@
 name: Release
 
-# Versioning is driven by git tags. Push a tag like `v1.2.3` to cut a release:
-#   git tag v1.2.3 && git push origin v1.2.3
+# Two ways to cut a release:
+#   1. Tag-driven:  git tag v1.2.3 && git push origin v1.2.3
+#   2. Manual:      Actions → Release → Run workflow → enter "1.2.3"
 on:
   push:
     tags:
       - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g. 1.2.3)'
+        required: true
+        type: string
 
 permissions:
-  contents: write   # create the GitHub Release
+  contents: write   # create the GitHub Release (and tag, on manual runs)
   packages: write   # publish + delete package versions
 
 jobs:
@@ -23,12 +30,22 @@ jobs:
           registry-url: https://npm.pkg.github.com
           scope: '@sebastienaglae'
 
-      # tag v1.2.3 -> package version 1.2.3 (no extra git commit/tag)
-      - name: Set version from tag
+      # Resolve the version + tag from either the pushed tag or the manual input
+      - name: Resolve version
+        id: ver
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
-          echo "Publishing version $VERSION"
-          npm version "$VERSION" --no-git-tag-version --allow-same-version
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            RAW="${{ github.event.inputs.version }}"
+          else
+            RAW="${GITHUB_REF_NAME}"
+          fi
+          VERSION="${RAW#v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION"   >> "$GITHUB_OUTPUT"
+          echo "Resolved version=$VERSION tag=v$VERSION"
+
+      - name: Set package version
+        run: npm version "${{ steps.ver.outputs.version }}" --no-git-tag-version --allow-same-version
 
       - name: Verify before publish
         run: npm run check && npm run smoke
@@ -38,8 +55,9 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # Creates the tag too when run manually (it doesn't exist yet)
       - name: Create GitHub Release
-        run: gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --generate-notes
+        run: gh release create "${{ steps.ver.outputs.tag }}" --target "$GITHUB_SHA" --title "${{ steps.ver.outputs.tag }}" --generate-notes
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

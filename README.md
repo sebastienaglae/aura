@@ -193,19 +193,22 @@ Two GitHub Actions workflows:
 
 - **CI** (`ci.yml`) — on every push/PR to `main`: syntax check, an ESM import smoke test
   (exports present), and `npm pack --dry-run`.
-- **Release** (`release.yml`) — on a pushed tag `v*.*.*`:
-  1. sets the package version **from the tag** (`v1.2.3` → `1.2.3`),
+- **Release** (`release.yml`) — on a pushed tag `v*.*.*` **or** a manual run:
+  1. resolves the version **from the tag** (`v1.2.3` → `1.2.3`) or the manual input,
   2. publishes to **GitHub Packages**,
-  3. creates a GitHub Release with generated notes,
+  3. creates a GitHub Release with generated notes (and the tag, on manual runs),
   4. **prunes every older version, keeping only the latest** (`min-versions-to-keep: 1`).
 
-Versioning is tag-driven — cut a release by tagging:
+Two ways to release:
 
 ```bash
-git tag v1.2.3
-git push origin v1.2.3
+# tag-driven
+git tag v1.2.3 && git push origin v1.2.3
 ```
+…or **Actions → Release → Run workflow** and enter `1.2.3` (no tag needed — it's created for you).
 
 No secrets to configure: it uses the built-in `GITHUB_TOKEN` (`permissions: packages: write`).
 If your org blocks `GITHUB_TOKEN` from deleting package versions, enable it in
 *Org → Packages settings* (or the prune step no-ops via `continue-on-error`).
+
+**Dependabot** (`.github/dependabot.yml`) keeps the GitHub Actions up to date weekly.
