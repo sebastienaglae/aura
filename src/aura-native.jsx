@@ -147,12 +147,17 @@ export function AuraFrame({
   const energy = useEnergy(clock, level, demo);
   const cfg = AURA_MODES[mode] || AURA_MODES.normal;
 
-  // sweep the rainbow by rotating the gradient transform
+  // sweep the rainbow by rotating the gradient DIRECTION via numeric x1/y1/x2/y2
+  // (gradientTransform expects an array natively — passing a string crashes RN-SVG)
   const gradProps = useAnimatedProps(() => {
     'worklet';
     const dps = 28 + energy.value * 240;
-    const deg = (clock.value * dps / 1000) % 360;
-    return { gradientTransform: `rotate(${deg} 0.5 0.5)` };
+    const a = ((clock.value * dps / 1000) % 360) * Math.PI / 180;
+    const r = 0.7, cxg = 0.5, cyg = 0.5;
+    return {
+      x1: cxg + Math.cos(a) * r, y1: cyg + Math.sin(a) * r,
+      x2: cxg - Math.cos(a) * r, y2: cyg - Math.sin(a) * r,
+    };
   });
   // glow line thickens with energy
   const glowProps = useAnimatedProps(() => ({ strokeWidth: borderWidth * (2.2 + energy.value * 4), opacity: 0.12 + energy.value * 0.22 }));
