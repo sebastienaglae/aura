@@ -7,7 +7,8 @@
  * fail state. UI only — drive `generating` / `result` / `error` from your app.
  *
  * Peer deps: react-native-reanimated, expo-linear-gradient
- *            (expo-av only if you reveal video with VideoGenNative)
+ * VISUAL ONLY — no audio/speech deps. To reveal a video, pass your own player
+ * element as `result` (e.g. an <expo-video>/<Video> you already use in your app).
  *
  *   <ImageGenNative generating={loading} result={url} error={err} style={{height:200}} />
  */

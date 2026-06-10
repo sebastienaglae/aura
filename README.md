@@ -175,26 +175,28 @@ function Assistant({ thinking, micOn }) {
 
 ## React Native
 
-A native re-implementation (no DOM/canvas/CSS/Web-Audio): the orb is drawn with
-**Skia**, animated with **Reanimated**, and mic loudness comes from **expo-av** metering
-(RN has no FFT, so `level` drives the waves — pass your own `bands` if you have a native
-analyser). Import from `@sebastienaglae/aura/native`.
+A native re-implementation of the **visuals** (no DOM/canvas/CSS): the orb is drawn with
+**Skia** and animated with **Reanimated**. **No microphone, speech-to-text, or audio
+dependency is shipped** — you drive the look with props. Import from
+`@sebastienaglae/aura/native`.
 
 ```bash
-# peer deps in your app
-npm i @shopify/react-native-skia react-native-reanimated react-native-gesture-handler \
-      expo-linear-gradient expo-av
+# peer deps in your app (no audio libs)
+npm i @shopify/react-native-skia react-native-reanimated expo-linear-gradient
 ```
 ```jsx
-import { AuraOrb, useAuraMic } from '@sebastienaglae/aura/native';
+import { AuraOrb } from '@sebastienaglae/aura/native';
 import { ImageGenNative, TextGenNative } from '@sebastienaglae/aura/native/gen';
 
-function Assistant({ thinking, micOn, loading, imageUrl, err }) {
-  const level = useAuraMic(micOn);                 // 0..1 from the device mic
+function Assistant({ thinking, activity, loading, imageUrl, err }) {
   return (
     <>
-      <AuraOrb mode={thinking ? 'think' : 'normal'} level={level} size={120}
-               borderRadius={24} />
+      {/* drive `level` (0..1) from anything: a stream, a timer, a value… */}
+      <AuraOrb mode={thinking ? 'think' : 'normal'} level={activity} size={120} borderRadius={24} />
+
+      {/* …or let it self-animate with zero input */}
+      <AuraOrb demo size={120} />
+
       <ImageGenNative generating={loading} result={imageUrl} error={err}
                       style={{ height: 220, borderRadius: 16 }} />
     </>
@@ -202,16 +204,17 @@ function Assistant({ thinking, micOn, loading, imageUrl, err }) {
 }
 ```
 
-- `<AuraOrb>` — props `mode`, `level` (0..1), `size`, `borderWidth`, `borderRadius`,
-  `spinIdle`, `spinSpeak`, `colorFade`. Same 5 modes, rotating rainbow frame, breathing pulse.
-- `useAuraMic(active)` — smoothed loudness from `expo-av` metering (needs mic permission).
+- `<AuraOrb>` — props `mode`, **`level`** (0..1, how active the orb looks), **`demo`**
+  (self-animating envelope, pure math — no input needed), `size`, `borderWidth`,
+  `borderRadius`, `spinIdle`, `spinSpeak`. Same 5 modes, rotating rainbow frame, breathing pulse.
 - Generators `ImageGenNative` / `SongGenNative` / `VideoGenNative` / `TextGenNative` —
-  props `generating`, `result`, `error`, `colors`, `style`; same colorful busy →
-  reveal → red fail behavior as the web ones.
+  props `generating`, `result`, `error`, `colors`, `style`; same colorful busy → reveal →
+  red fail behavior as the web ones. (`VideoGenNative` reveals whatever player element you
+  pass as `result`.)
 
-> Web-only features (DOM highlight-and-avoid, `SpeechRecognition` subtitles) aren't in the
-> native build. Drive `mode`/`level` and the generators' `generating`/`result`/`error`
-> from your app state.
+> Web-only features (DOM highlight-and-avoid, `SpeechRecognition` subtitles) are **not** in
+> the native build by design. Drive `mode`/`level`/`demo` and the generators' props from
+> your app state.
 
 ---
 
@@ -222,7 +225,7 @@ src/                the published package (only this + README + LICENSE ship)
   aura.js             web orb + audio engine
   aura-gen.js         web generative-AI animations
   aura-react.jsx      React (web) bindings
-  aura-native.jsx     React Native orb (Skia + Reanimated) + useAuraMic
+  aura-native.jsx     React Native orb (Skia + Reanimated) — visual only
   aura-native-gen.jsx React Native generators
   index.js / index.d.ts
 demo/               local demos (NOT published)
