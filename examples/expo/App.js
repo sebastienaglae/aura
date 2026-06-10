@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { ScrollView, View, Text, Pressable, StyleSheet, Image } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { AuraOrb } from '../../src/aura-native';
+import { AuraOrb, AuraFrame } from '../../src/aura-native';
 import { ImageGenNative, SongGenNative, VideoGenNative, TextGenNative } from '../../src/aura-native-gen';
 
 const MODES = ['normal', 'think', 'error', 'success', 'warning'];
@@ -57,7 +57,8 @@ export default function App() {
   };
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+   <AuraFrame mode={mode} demo={demo} borderRadius={26} style={styles.screen}>
+    <ScrollView contentContainerStyle={styles.content}>
       <StatusBar style="light" />
       <Text style={styles.h1}>Aura</Text>
       <Text style={styles.tag}>DASH SYSTEMS · REACT NATIVE</Text>
@@ -108,6 +109,7 @@ export default function App() {
 
       <View style={{ height: 60 }} />
     </ScrollView>
+   </AuraFrame>
   );
 }
 
