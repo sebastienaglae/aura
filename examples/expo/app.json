@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "Aura",
+    "slug": "aura",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#06070c",
+    "platforms": ["ios", "android"],
+    "assetBundlePatterns": ["**/*"]
+  }
+}

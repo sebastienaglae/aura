@@ -4,3 +4,8 @@ dist/
 .DS_Store
 .cache/
 .claude/
+
+# example app artifacts
+examples/*/node_modules/
+examples/*/.expo/
+aura-expo-qr.png
