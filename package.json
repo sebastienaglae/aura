@@ -9,7 +9,9 @@
   "exports": {
     ".": "./src/index.js",
     "./gen": "./src/aura-gen.js",
-    "./react": "./src/aura-react.jsx"
+    "./react": "./src/aura-react.jsx",
+    "./native": "./src/aura-native.jsx",
+    "./native/gen": "./src/aura-native-gen.jsx"
   },
   "files": [
     "src",
@@ -35,10 +37,20 @@
   },
   "peerDependencies": {
     "react": ">=17",
-    "react-dom": ">=17"
+    "react-dom": ">=17",
+    "react-native": ">=0.70",
+    "@shopify/react-native-skia": ">=0.1.200",
+    "react-native-reanimated": ">=3",
+    "expo-linear-gradient": ">=12",
+    "expo-av": ">=13"
   },
   "peerDependenciesMeta": {
     "react": { "optional": true },
-    "react-dom": { "optional": true }
+    "react-dom": { "optional": true },
+    "react-native": { "optional": true },
+    "@shopify/react-native-skia": { "optional": true },
+    "react-native-reanimated": { "optional": true },
+    "expo-linear-gradient": { "optional": true },
+    "expo-av": { "optional": true }
   }
 }

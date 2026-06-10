@@ -173,13 +173,57 @@ function Assistant({ thinking, micOn }) {
 
 ---
 
+## React Native
+
+A native re-implementation (no DOM/canvas/CSS/Web-Audio): the orb is drawn with
+**Skia**, animated with **Reanimated**, and mic loudness comes from **expo-av** metering
+(RN has no FFT, so `level` drives the waves — pass your own `bands` if you have a native
+analyser). Import from `@sebastienaglae/aura/native`.
+
+```bash
+# peer deps in your app
+npm i @shopify/react-native-skia react-native-reanimated react-native-gesture-handler \
+      expo-linear-gradient expo-av
+```
+```jsx
+import { AuraOrb, useAuraMic } from '@sebastienaglae/aura/native';
+import { ImageGenNative, TextGenNative } from '@sebastienaglae/aura/native/gen';
+
+function Assistant({ thinking, micOn, loading, imageUrl, err }) {
+  const level = useAuraMic(micOn);                 // 0..1 from the device mic
+  return (
+    <>
+      <AuraOrb mode={thinking ? 'think' : 'normal'} level={level} size={120}
+               borderRadius={24} />
+      <ImageGenNative generating={loading} result={imageUrl} error={err}
+                      style={{ height: 220, borderRadius: 16 }} />
+    </>
+  );
+}
+```
+
+- `<AuraOrb>` — props `mode`, `level` (0..1), `size`, `borderWidth`, `borderRadius`,
+  `spinIdle`, `spinSpeak`, `colorFade`. Same 5 modes, rotating rainbow frame, breathing pulse.
+- `useAuraMic(active)` — smoothed loudness from `expo-av` metering (needs mic permission).
+- Generators `ImageGenNative` / `SongGenNative` / `VideoGenNative` / `TextGenNative` —
+  props `generating`, `result`, `error`, `colors`, `style`; same colorful busy →
+  reveal → red fail behavior as the web ones.
+
+> Web-only features (DOM highlight-and-avoid, `SpeechRecognition` subtitles) aren't in the
+> native build. Drive `mode`/`level` and the generators' `generating`/`result`/`error`
+> from your app state.
+
+---
+
 ## Repo layout
 
 ```
 src/                the published package (only this + README + LICENSE ship)
-  aura.js             orb + audio engine
-  aura-gen.js         generative-AI animations
-  aura-react.jsx      React bindings
+  aura.js             web orb + audio engine
+  aura-gen.js         web generative-AI animations
+  aura-react.jsx      React (web) bindings
+  aura-native.jsx     React Native orb (Skia + Reanimated) + useAuraMic
+  aura-native-gen.jsx React Native generators
   index.js / index.d.ts
 demo/               local demos (NOT published)
 .github/workflows/  CI + Release
