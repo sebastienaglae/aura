@@ -6,7 +6,16 @@
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#06070c",
-    "platforms": ["ios", "android"],
-    "assetBundlePatterns": ["**/*"]
+    "platforms": [
+      "ios",
+      "android"
+    ],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "plugins": [
+      "expo-asset",
+      "expo-font"
+    ]
   }
 }

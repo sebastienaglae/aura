@@ -8,10 +8,11 @@ const workspaceRoot = path.resolve(projectRoot, '../..');
 
 const config = getDefaultConfig(projectRoot);
 config.watchFolders = [workspaceRoot];
+// also look in this app's node_modules when resolving the library's imports
 config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),
   path.resolve(workspaceRoot, 'node_modules'),
 ];
-config.resolver.disableHierarchicalLookup = true;
+// NOTE: keep hierarchical lookup ON so nested transitive deps still resolve.
 
 module.exports = config;
