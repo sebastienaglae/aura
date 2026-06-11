@@ -1,6 +1,6 @@
 {
   "name": "@sebastienaglae/aura",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Aura — a voice-reactive orb and a set of generative-AI loading animations (image, song, video, text). Framework-agnostic with optional React bindings. A Dash Systems product.",
   "type": "module",
   "main": "./src/index.js",

@@ -1,8 +1,11 @@
 # Aura
 
+[![CI](https://github.com/sebastienaglae/aura/actions/workflows/ci.yml/badge.svg)](https://github.com/sebastienaglae/aura/actions/workflows/ci.yml)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+
 **A Dash Systems product.** A voice-reactive orb + a set of colorful *generative-AI* loading
-animations (image, song, video, text) with success **and failure** states. Framework-agnostic,
-dependency-free, with optional React bindings.
+animations (image, song, video, text) with success **and failure** states. Web (canvas) +
+React + **React Native**, framework-agnostic, dependency-free core.
 
 > Repo: **`sebastienaglae/aura`** · package: **`@sebastienaglae/aura`**
 
@@ -204,17 +207,26 @@ function Assistant({ thinking, activity, loading, imageUrl, err }) {
 }
 ```
 
-- `<AuraOrb>` — props `mode`, **`level`** (0..1, how active the orb looks), **`demo`**
-  (self-animating envelope, pure math — no input needed), `size`, `borderWidth`,
-  `borderRadius`, `spinIdle`, `spinSpeak`. Same 5 modes, rotating rainbow frame, breathing pulse.
+- `<AuraOrb>` — props `mode`, **`level`** (0..1), **`demo`** (self-animating, no input),
+  `size`, **`draggable`**, **`lite`**, `style`. Fixed size; the colored wave lines move and
+  change color per mode (cross-faded). Drawn with stroked lines (cheap), not filled polygons.
+- `<AuraFrame mode level demo lite borderWidth borderRadius glow>` — rainbow aura around the
+  edge. `borderRadius` defaults to `useScreenCornerRadius()`.
 - Generators `ImageGenNative` / `SongGenNative` / `VideoGenNative` / `TextGenNative` —
-  props `generating`, `result`, `error`, `colors`, `style`; same colorful busy → reveal →
-  red fail behavior as the web ones. (`VideoGenNative` reveals whatever player element you
-  pass as `result`.)
+  props `generating`, `result`, `error`, `colors`, `style`; same busy → reveal → red fail.
+
+**Lite mode (weak phones):** pass `lite` to `AuraOrb`/`AuraFrame` — fewer wave lines, fewer
+points, no per-frame color cross-fade, no glow. Much cheaper per frame.
+
+**Device corner radius:** `useScreenCornerRadius(override?)` returns a per-platform fallback
+in pure JS (RN has no JS API for the hardware radius). To get the **real** value, link a tiny
+native module named `AuraCorner` exposing `getCornerRadius()` — the example ships one as an
+Expo local module (`examples/expo/modules/aura-corner`, reads Android's system
+`rounded_corner_radius`). It returns the true radius in a dev-client/standalone build and
+falls back automatically in Expo Go.
 
 > Web-only features (DOM highlight-and-avoid, `SpeechRecognition` subtitles) are **not** in
-> the native build by design. Drive `mode`/`level`/`demo` and the generators' props from
-> your app state.
+> the native build by design.
 
 ---
 

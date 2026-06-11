@@ -3,6 +3,10 @@ import { ScrollView, View, Text, Pressable, StyleSheet, Image } from 'react-nati
 import { StatusBar } from 'expo-status-bar';
 import { AuraOrb, AuraFrame } from '../../src/aura-native';
 import { ImageGenNative, SongGenNative, VideoGenNative, TextGenNative } from '../../src/aura-native-gen';
+import { getSystemCornerRadius } from './modules/aura-corner';
+
+// real device corner radius (native build) or undefined -> AuraFrame falls back
+const SYSTEM_CORNER = getSystemCornerRadius();
 
 const MODES = ['normal', 'think', 'error', 'success', 'warning'];
 const SAMPLE_TEXT =
@@ -34,6 +38,7 @@ function GenCard({ title, children, onGen, onFail }) {
 export default function App() {
   const [mode, setMode] = useState('normal');
   const [demo, setDemo] = useState(true);
+  const [lite, setLite] = useState(false);
 
   // generator state
   const [g, setG] = useState({
@@ -57,15 +62,16 @@ export default function App() {
   };
 
   return (
-   <AuraFrame mode={mode} demo={demo} borderRadius={26} style={styles.screen}>
+   <AuraFrame mode={mode} demo={demo} lite={lite} borderRadius={SYSTEM_CORNER} style={styles.screen}>
     <ScrollView contentContainerStyle={styles.content}>
       <StatusBar style="light" />
       <Text style={styles.h1}>Aura</Text>
       <Text style={styles.tag}>DASH SYSTEMS · REACT NATIVE</Text>
+      <Text style={styles.tag}>corner: {SYSTEM_CORNER != null ? SYSTEM_CORNER + 'dp (system)' : 'fallback'} · {lite ? 'LITE' : 'full'}</Text>
 
       {/* main orb — drag it around */}
       <View style={styles.orbWrap}>
-        <AuraOrb mode={mode} demo={demo} size={150} draggable />
+        <AuraOrb mode={mode} demo={demo} size={150} draggable lite={lite} />
       </View>
 
       <View style={styles.controls}>
@@ -73,11 +79,12 @@ export default function App() {
           <Btn key={m} label={m} onPress={() => setMode(m)} tint={mode === m ? '#4d7bff' : undefined} />
         ))}
         <Btn label={demo ? 'demo: on' : 'demo: off'} onPress={() => setDemo((d) => !d)} tint="#a93bff" />
+        <Btn label={lite ? 'lite: on' : 'lite: off'} onPress={() => setLite((v) => !v)} tint="#21d36a" />
       </View>
 
       {/* tiny gallery of all modes */}
       <View style={styles.gallery}>
-        {MODES.map((m) => <AuraOrb key={m} mode={m} demo size={70} />)}
+        {MODES.map((m) => <AuraOrb key={m} mode={m} demo size={70} lite={lite} />)}
       </View>
 
       <Text style={styles.section}>Generators</Text>
