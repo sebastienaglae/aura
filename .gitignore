@@ -14,3 +14,5 @@ aura-expo-qr.png
 _apk/
 _out/
 *.apk
+
+.apk_run_id
