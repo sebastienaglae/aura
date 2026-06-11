@@ -28,6 +28,7 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+          cache: gradle   # cache ~/.gradle so subsequent builds are much faster
 
       - name: Install deps
         run: npm ci || npm install

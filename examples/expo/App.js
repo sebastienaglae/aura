@@ -63,9 +63,9 @@ export default function App() {
       <Text style={styles.h1}>Aura</Text>
       <Text style={styles.tag}>DASH SYSTEMS · REACT NATIVE</Text>
 
-      {/* main orb */}
+      {/* main orb — drag it around */}
       <View style={styles.orbWrap}>
-        <AuraOrb mode={mode} demo={demo} size={150} />
+        <AuraOrb mode={mode} demo={demo} size={150} draggable />
       </View>
 
       <View style={styles.controls}>
