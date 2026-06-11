@@ -3,6 +3,11 @@
 All notable changes to this project are documented here. Versioning is tag-driven
 (`vX.Y.Z` → published to GitHub Packages).
 
+## 0.2.1
+
+- Normalize `repository.url` (`git+https://…`) to clear the npm publish warning.
+- Republish (0.2.0 was already published; GitHub Packages versions are immutable).
+
 ## 0.2.0
 
 ### React Native
