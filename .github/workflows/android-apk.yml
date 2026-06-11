@@ -1,0 +1,65 @@
+name: Android APK
+
+# Builds an installable (debug-signed) APK of the Expo example.
+# Runs on a version tag, or manually. The APK is uploaded as a run artifact
+# and (on a tag) attached to the GitHub Release.
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: examples/expo
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install deps
+        run: npm ci || npm install
+
+      - name: Set app version from tag
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          node -e "const fs=require('fs');const j=JSON.parse(fs.readFileSync('app.json','utf8'));j.expo.version=process.env.GITHUB_REF_NAME.replace(/^v/,'');fs.writeFileSync('app.json',JSON.stringify(j,null,2))"
+
+      - name: Expo prebuild (android)
+        run: npx expo prebuild --platform android --no-install
+
+      - name: Force debug signing on release (so the APK is installable for testing)
+        run: sed -i 's/signingConfig signingConfigs.release/signingConfig signingConfigs.debug/' android/app/build.gradle
+
+      - name: Gradle assembleRelease
+        run: cd android && ./gradlew assembleRelease --no-daemon
+
+      - name: Stage APK
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/_out"
+          cp android/app/build/outputs/apk/release/app-release.apk "$GITHUB_WORKSPACE/_out/aura-${GITHUB_REF_NAME:-manual}.apk"
+          ls -la "$GITHUB_WORKSPACE/_out"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aura-apk
+          path: _out/*.apk
+          if-no-files-found: error
+
+      - name: Attach APK to the GitHub Release (on tag)
+        if: startsWith(github.ref, 'refs/tags/')
+        run: gh release upload "$GITHUB_REF_NAME" "$GITHUB_WORKSPACE"/_out/*.apk --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
