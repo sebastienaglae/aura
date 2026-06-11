@@ -9,3 +9,8 @@ dist/
 examples/*/node_modules/
 examples/*/.expo/
 aura-expo-qr.png
+
+# downloaded build outputs
+_apk/
+_out/
+*.apk
